@@ -26,3 +26,5 @@ tracing = { version = "0.1", features = ["log"] }
 tracing-opentelemetry = "0.28"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 uuid = "1"
+metrics-exporter-prometheus = "0.16.2"
+metrics = "0.24.1"

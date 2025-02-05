@@ -4,11 +4,12 @@ use crate::api::error::Error;
 
 use super::{
     error::{ApiError, Result},
-    observe::RequestContext,
+    observe::{self, RequestContext},
 };
 use axum::{
     body::Bytes,
     http::{header, Request},
+    middleware,
     routing::get,
     Router,
 };
@@ -78,14 +79,18 @@ pub fn routes() -> Router {
         .allow_headers(Any)
         .allow_origin(Any);
 
+    // 此处设置有顺序
     Router::new()
         .nest("/api", api::routes())
         .route("/healthz", get(check))
         .with_state(state)
         .fallback(not_found)
+        .merge(observe::metrics_router())
+        .layer(middleware::from_fn(observe::metrics))
+        // .route_layer(auth) // 认证只作用与明确路由, 不作用于fallback
         .layer(cors)
         .layer(middleware)
-        .layer(TraceLayer::new_for_http())
+    // .layer(TraceLayer::new_for_http())
 }
 
 async fn not_found(context: RequestContext) -> Result<()> {
