@@ -3,7 +3,6 @@ use opentelemetry::trace::TraceContextExt;
 use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
-use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RequestContext {
@@ -24,7 +23,7 @@ where
             .extensions
             .get::<RequestId>()
             .and_then(|id| id.header_value().to_str().ok().map(|s| s.to_string()))
-            .unwrap_or(Uuid::new_v4().to_string());
+            .unwrap();
 
         let trace_id = tracing::Span::current()
             .context()
@@ -32,6 +31,7 @@ where
             .span_context()
             .trace_id()
             .to_string();
+
         Ok(Self {
             uri: parts.uri.clone().to_string(),
             request_id,
