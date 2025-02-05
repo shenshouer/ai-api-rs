@@ -1,5 +1,4 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
-use tracing::debug;
 
 use super::{observe::RequestContext, resp::ApiResponse};
 
@@ -16,8 +15,11 @@ impl ApiError {
 
 pub enum Error {
     NotFound(String),
+    #[allow(dead_code)]
     BadRequest(String),
-    InternalError(String),
+    #[allow(dead_code)]
+    Internal(String),
+    #[allow(dead_code)]
     Unauthorized(String),
 }
 
@@ -33,7 +35,7 @@ impl IntoResponse for ApiError {
                 StatusCode::BAD_REQUEST,
                 Json(ApiResponse::error(self.context, 400, msg)),
             ),
-            InternalError(msg) => (
+            Internal(msg) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(self.context, 500, msg)),
             ),

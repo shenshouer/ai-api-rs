@@ -7,22 +7,9 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RequestContext {
-    pub uri: String,              // 请求路径和查询参数
-    pub request_id: String,       // 请求唯一ID
-    pub trace_id: Option<String>, // 跟踪ID（示例使用字符串）
-}
-
-impl RequestContext {
-    pub fn generate_trace_id(&mut self) {
-        self.trace_id = Some(
-            tracing::Span::current()
-                .context()
-                .span()
-                .span_context()
-                .trace_id()
-                .to_string(),
-        );
-    }
+    pub uri: String,        // 请求路径和查询参数
+    pub request_id: String, // 请求唯一ID
+    pub trace_id: String,   // 跟踪ID（示例使用字符串）
 }
 
 impl<S> FromRequestParts<S> for RequestContext
@@ -39,17 +26,16 @@ where
             .and_then(|id| id.header_value().to_str().ok().map(|s| s.to_string()))
             .unwrap_or(Uuid::new_v4().to_string());
 
-        // 此处在Span之前，无法获取到trace_id
-        // let trace_id = tracing::Span::current()
-        //     .context()
-        //     .span()
-        //     .span_context()
-        //     .trace_id()
-        //     .to_string();
+        let trace_id = tracing::Span::current()
+            .context()
+            .span()
+            .span_context()
+            .trace_id()
+            .to_string();
         Ok(Self {
             uri: parts.uri.clone().to_string(),
             request_id,
-            trace_id: None,
+            trace_id,
         })
     }
 }
