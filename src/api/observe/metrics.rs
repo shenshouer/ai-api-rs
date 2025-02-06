@@ -38,6 +38,7 @@ pub(crate) async fn metrics(req: Request, next: Next) -> impl IntoResponse {
         req.uri().path().to_owned()
     };
     let method = req.method().clone().to_string();
+    // TODO: 此处流式数据处理可能有问题，后续修复
     let response = next.run(req).await;
 
     let latency = start.elapsed().as_secs_f64();
